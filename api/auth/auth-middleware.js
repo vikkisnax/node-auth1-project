@@ -30,7 +30,10 @@ async function checkUsernameFree(req, res, next) {
     if (!users.length){
       next()
     } else {
-      next({"message": "Username taken"})
+      next({
+        status: 422,
+        message: "Username taken"
+      })
     }
   } catch(err){
     next(err)
@@ -45,8 +48,23 @@ async function checkUsernameFree(req, res, next) {
     "message": "Invalid credentials"
   }
 */
-function checkUsernameExists(req, res, next) {
-next()
+//we want login usernamme to be there
+//async await bc want model function to rreturn info/promise first
+async function checkUsernameExists(req, res, next) {
+  try{
+    const users = await User.findBy({ username: req.body.username})
+
+    if (users.length){
+      next()
+    } else {
+      next({
+        status: 401,
+        message: "Invalid credentials"
+      })
+    }
+  } catch(err){
+    next(err)
+  }
 }
 
 /*
