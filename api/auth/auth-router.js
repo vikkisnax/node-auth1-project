@@ -1,4 +1,8 @@
 const router = require('express').Router();
+const bcrypt = require('bcryptjs');
+const User = require('..//users/users-model');
+
+
 // Require `checkUsernameFree`, `checkUsernameExists` and `checkPasswordLength` middleware functions from `auth-middleware.js`. 
 const {
   checkUsernameFree,
@@ -29,7 +33,17 @@ const {
   }
  */
 router.post('/register', checkUsernameFree, checkPasswordLength, (req, res, next) => {
-  res.json('auth router register')
+  // res.json('auth router register')
+  //store user in db. get User model
+  const { username, password } = req.body;
+  //store the hash, not the plain text password
+  const hash = bcrypt.hashSync(password, 8) // 2^8
+
+  User.add({username, password: hash})
+  .then(saved => {
+    res.status(201).json(saved)
+  })
+  .catch(next)
 })
 
 
@@ -50,7 +64,24 @@ router.post('/register', checkUsernameFree, checkPasswordLength, (req, res, next
   }
  */
 router.post('/login', checkUsernameExists, (req, res, next) => {
-  res.json('auth router login')
+  // res.json('auth router login')
+  const { password } = req.body;
+  //req.user.password bc req has a user which has the password in the db
+  // bcrypt will compareSync the plaintext password to the hashed password in the db
+  if (bcrypt.compareSync(password, req.user.password)){
+    //if password is valid, make it so 1. the cookie is set on the client
+    //header will travel w/ a response. 2. make it so server stores sesssion w/ session id corresponding to this user. cookie carries session id w/ it
+    // change session object by storing user on session, we will do 1 and 2 above
+    req.session.user = req.user
+    res.json({
+      message: `Welcome ${req.user.username}`
+    })
+  } else {
+    next({
+      status: 401,
+      message: "Invalid credentials"
+    })
+  }
 })
 
 
