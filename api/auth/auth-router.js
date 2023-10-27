@@ -102,7 +102,24 @@ router.post('/login', checkUsernameExists, (req, res, next) => {
   }
  */
 router.get('/logout', (req, res, next) => {
-  res.json('auth router logout')
+  // res.json('auth router logout')
+  //check if there's a session 
+  if (req.session.user) {
+    const { username } = req.session.user
+    //destroy session
+    req.session.destroy(err => {
+      if (err) {
+        res.json({ message: `You can never leave, ${username}...` })
+      } else {
+        // the following line is optional: compliant browsers will delete the cookie from their storage
+        res.set('Set-Cookie', 'monkey=; SameSite=Strict; Path=/; Expires=Thu, 01 Jan 1970 00:00:00')
+        
+        res.json({ message: 'logged out' })
+      }
+    })
+  } else {
+    res.json({ message: 'no session' })
+  }
 })
 
 
