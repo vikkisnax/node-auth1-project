@@ -6,6 +6,7 @@ const db = require('../../data/db-config')
  */
 function find() {
   return db('users')
+    .select('user_id', 'username')
 }
 
 /**
@@ -23,6 +24,7 @@ function findBy(filter) {
  */
 function findById(user_id) {
   return db('users')
+    .select('user_id', 'username')
     .where('user_id', user_id)
     .first()
 }
