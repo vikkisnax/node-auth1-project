@@ -10,9 +10,20 @@ const User = require('../users/users-model')
 */
 // do last
 function restricted(req, res, next) {
-  console.log('restricted mw');
-  next()
+  //console.log('restricted mw');
+  //if there's a user on the session, then we're good - user logged in successfully. only works if client sends proper cookie back so server can find the session 
+  if (req.session.user){
+    next()
+  } else{
+    next({
+      status: 401,
+      message: "You shall not pass!"
+    })
+  }
+  //now we need a client who will automatically send the cookie back on subsequent request to the same api/website
 }
+
+
 
 /*
   If the username in req.body already exists in the database
